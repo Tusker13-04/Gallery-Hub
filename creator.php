@@ -2,7 +2,7 @@
 session_start();
 include 'db.php'; // Ensure this file connects to your database
 
-// Fetch the current user email from the curr column (index 0)
+// Fetch the current user email from the 'curr' column (index 0)
 $sql = "SELECT curr FROM user LIMIT 1"; // Get the first entry
 $result = $conn->query($sql);
 
@@ -62,6 +62,67 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             }
             return true; // Allow form submission
         }
+
+        async function handleAnalyze() {
+            const imageInput = document.getElementById('art');
+            const analyzeButton = document.getElementById('analyze-button');
+            const analysisResult = document.getElementById('analysis-result');
+
+            const file = imageInput.files[0];
+            if (!file) {
+                alert('Please select an image first.');
+                return;
+            }
+
+            analyzeButton.disabled = true;
+            analysisResult.textContent = 'Analyzing...';
+
+            try {
+                // Convert image file to Base64
+                const base64Image = await toBase64(file);
+
+                // Send the Base64 encoded image to the Ollama LLaVA model
+                const payload = {
+                    model: "llava:latest",
+                    prompt: "Generate a list of descriptive tags for the given image. Use a bag of words and ensure the tags are relevant and dicriptive, such that even a blind person can visualizw the image from the given each word must be separate by comma, don't use prepositions.",
+                    images: [base64Image],
+                    format: "json",
+                    stream: false,
+                };
+
+                const analysisResponse = await fetch('http://127.0.0.1:11434/api/generate', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(payload),
+                });
+
+                if (!analysisResponse.ok) {
+                    throw new Error('Failed to analyze image');
+                }
+
+                const analysisData = await analysisResponse.json();
+                analysisResult.textContent = `Response:\n${analysisData.response}`;
+                
+                // Automatically populate the genre field with the first few tags
+                const tags = analysisData.response.split(',').slice(0, 3).join(', ');
+                document.getElementById('art_genre').value = tags;
+            } catch (err) {
+                analysisResult.textContent = `Error: ${err.message}`;
+            } finally {
+                analyzeButton.disabled = false;
+            }
+        }
+
+        function toBase64(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = () => resolve(reader.result.split(',')[1]);
+                reader.onerror = error => reject(error);
+            });
+        }
     </script>
 </head>
 <body>
@@ -73,6 +134,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             <div class="form-group">
                 <label for="art">Select creation to upload:</label>
                 <input type="file" name="art" id="art" required>
+                <button type="button" id="analyze-button" class="btn btn-info mt-2" onclick="handleAnalyze()">Analyze Image</button>
+                <div id="analysis-result" class="mt-2 p-2 border rounded"></div>
             </div>
             <div class="form-group">
                 <label for="art_desc">Description:</label>
