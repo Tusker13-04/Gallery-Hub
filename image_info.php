@@ -333,6 +333,67 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['rating'])) {
 
                 <a href="gallery.php" class="btn btn-back">Back to Gallery</a>
             </div>
+
+            <div class="comment-section">
+            <h2 style="text-align: center;">Write a comment</h2>
+
+            <form method="post" action="" id="commentForm" style="text-align: center; margin-bottom: 20px;">
+                <textarea name="new_comment" required placeholder="Tell us your thoughts!" style="width: 80%; height: 100px; border-radius: 5px; padding: 10px; font-size: 16px; border: 1px solid #ccc; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);"></textarea>
+                <br>
+                <button type="submit" class="btn btn-primary" style="margin-top: 10px; padding: 10px 20px; font-size: 16px; border-radius: 5px;">Submit Comment</button>
+            </form>
+
+            <h2 style="text-align: center;">Comment Section</h2>
+            
+            <div class="existing-comments" id="commentsContainer" style="border: 1px solid #ccc; padding: 1rem; border-radius: 8px; margin-top: 1rem; background: #f9f9f9;">
+                <?php
+                // Fetch existing comments from the database
+                $commentsSql = "SELECT comment FROM user WHERE mail = ?";
+                $commentsStmt = $conn->prepare($commentsSql);
+                $commentsStmt->bind_param("s", $creatorEmail);
+                $commentsStmt->execute();
+                $commentsResult = $commentsStmt->get_result();
+
+                // Display existing comments
+                if ($commentsResult->num_rows > 0) {
+                    $commentsRow = $commentsResult->fetch_assoc();
+                    $comments = $commentsRow['comment'];
+                    $individualComments = explode("<?>", $comments);
+
+                    $colors = ['#e0f7fa', '#ffebee', '#ffe0b2', '#e1bee7', '#c8e6c9']; // Array of colors for margins
+
+                    foreach ($individualComments as $index => $individualComment) {
+                        if (!empty(trim($individualComment))) {
+                            $color = $colors[$index % count($colors)]; // Cycle through colors
+                            echo "<div style='margin: 10px; padding: 10px; border-radius: 5px; background: $color;'>" . htmlspecialchars(trim($individualComment)) . "</div>";
+                        }
+                    }
+                } else {
+                    echo "<p>No comments yet.</p>";
+                }
+                ?>
+            </div>
+
+            <?php
+            if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['new_comment'])) {
+                $newComment = $_POST['new_comment'];
+
+                // Append the new comment to the existing comments
+                $updateCommentSql = "UPDATE user SET comment = CONCAT(IFNULL(comment, ''), ?, '<?>') WHERE mail=?";
+                $updateCommentStmt = $conn->prepare($updateCommentSql);
+                $updateCommentStmt->bind_param("ss", $newComment, $creatorEmail);
+
+                if ($updateCommentStmt->execute()) {
+                    echo "<script>
+                        var commentsContainer = document.getElementById('commentsContainer');
+                        commentsContainer.innerHTML += '<div style=\"margin: 10px; padding: 10px; border-radius: 5px; background: #e0f7fa;\">' + " . json_encode(trim($newComment)) . " + '</div>';
+                        document.getElementById(\"commentForm\").reset();
+                    </script>";
+                } else {
+                    echo "Error updating the comments: " . $conn->error;
+                }
+            }
+            ?>
         </div>
     </main>
 </body>
