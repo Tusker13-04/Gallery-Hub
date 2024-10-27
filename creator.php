@@ -391,17 +391,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             return true;
         }
 
-        // Update file input label with filename
         document.getElementById('art').addEventListener('change', function(e) {
             const fileName = e.target.files[0]?.name || 'Click to choose a file or drag it here';
             e.target.closest('.file-upload-wrapper').querySelector('span').textContent = fileName;
         });
 
-        // Image analysis functionality
         const imageInput = document.getElementById('art');
         const analyzeButton = document.getElementById('analyze-button');
         const analysisResult = document.getElementById('analysis-result');
-        //const genreInput = document.getElementById('art_genre');
         const descInput =document.getElementById('art_desc')
 
         analyzeButton.addEventListener('click', handleAnalyze);
@@ -417,10 +414,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             analysisResult.textContent = 'Analyzing...';
 
             try {
-                // Convert image file to Base64
                 const base64Image = await toBase64(file);
                 
-                // Send the Base64 encoded image to the Ollama LLaVA model
                 const payload = {
                     model: "x/llama3.2-vision:latest",
                     prompt: "Generate a list of descriptive tags for the given image. Use a bag of words and ensure the tags are relevant and dicriptive, such that even a blind person can visualize the image from the given. each word must be separate by comma, don't use prepositions.",
@@ -444,10 +439,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 console.log("Raw response:", analysisData);
                 const analysisData = await analysisResponse.json();
                 
-                // Display the response in both the analysis result div and genre input
-                //analysisResult.textContent = `Analysis Tags: ${analysisData.response}`;
                 descInput.value = analysisData.response;
-                //genreInput.value = analysisData.response;
+ 
 
             } catch (err) {
                 analysisResult.textContent = `Error: ${err.message}`;
@@ -456,12 +449,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             }
         }
 
-        // Utility function to convert a file to Base64
         function toBase64(file) {
             return new Promise((resolve, reject) => {
                 const reader = new FileReader();
                 reader.readAsDataURL(file);
-                reader.onload = () => resolve(reader.result.split(',')[1]); // Get only the Base64 part
+                reader.onload = () => resolve(reader.result.split(',')[1]);
                 reader.onerror = error => reject(error);
             });
         }
