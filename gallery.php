@@ -315,7 +315,6 @@ $result = $conn->query($sql);
     </div>
 
     <script>
-        // Add loading animation for images
         document.addEventListener('DOMContentLoaded', function() {
             const images = document.querySelectorAll('.art-image');
             images.forEach(img => {
