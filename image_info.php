@@ -347,24 +347,22 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['rating'])) {
             
             <div class="existing-comments" id="commentsContainer" style="border: 1px solid #ccc; padding: 1rem; border-radius: 8px; margin-top: 1rem; background: #f9f9f9;">
                 <?php
-                // Fetch existing comments from the database
                 $commentsSql = "SELECT comment FROM user WHERE mail = ?";
                 $commentsStmt = $conn->prepare($commentsSql);
                 $commentsStmt->bind_param("s", $creatorEmail);
                 $commentsStmt->execute();
                 $commentsResult = $commentsStmt->get_result();
 
-                // Display existing comments
                 if ($commentsResult->num_rows > 0) {
                     $commentsRow = $commentsResult->fetch_assoc();
                     $comments = $commentsRow['comment'];
                     $individualComments = explode("<?>", $comments);
 
-                    $colors = ['#e0f7fa', '#ffebee', '#ffe0b2', '#e1bee7', '#c8e6c9']; // Array of colors for margins
+                    $colors = ['#e0f7fa', '#ffebee', '#ffe0b2', '#e1bee7', '#c8e6c9'];
 
                     foreach ($individualComments as $index => $individualComment) {
                         if (!empty(trim($individualComment))) {
-                            $color = $colors[$index % count($colors)]; // Cycle through colors
+                            $color = $colors[$index % count($colors)];
                             echo "<div style='margin: 10px; padding: 10px; border-radius: 5px; background: $color;'>" . htmlspecialchars(trim($individualComment)) . "</div>";
                         }
                     }
@@ -378,7 +376,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['rating'])) {
             if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['new_comment'])) {
                 $newComment = $_POST['new_comment'];
 
-                // Append the new comment to the existing comments
                 $updateCommentSql = "UPDATE user SET comment = CONCAT(IFNULL(comment, ''), ?, '<?>') WHERE mail=?";
                 $updateCommentStmt = $conn->prepare($updateCommentSql);
                 $updateCommentStmt->bind_param("ss", $newComment, $creatorEmail);
