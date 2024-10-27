@@ -58,6 +58,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['rating'])) {
 <html>
 <head>
     <title>Artwork Details - Gallery Hub</title>
+    /* Base Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+        }
 
         :root {
             --primary: #6d28d9;
