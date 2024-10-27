@@ -22,7 +22,7 @@
     }
 
     body {
-      background-image: url('./download.jpg'); /* Replace with your image path */
+      background-image: url('./download.jpg'); 
       background-size: cover;
       background-repeat: no-repeat;
       min-height: 100vh;

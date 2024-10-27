@@ -1,6 +1,6 @@
 <?php
 session_start();
-include 'db.php'; // Ensure this file connects to your database
+include 'db.php'; 
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $email = $_POST['email'];
@@ -53,7 +53,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
 
         body {
-            background-image: url('./download.jpg'); /* Replace with your image path */
+            background-image: url('./download.jpg'); 
             background-size: cover;
             background-repeat: no-repeat;
             min-height: 100vh;

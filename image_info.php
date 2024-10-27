@@ -1,10 +1,13 @@
-<?php
-session_start();
-include 'db.php';
 
+<?php
+
+session_start();
+include 'db.php'; 
+
+// Retrieve Creator's Artwork Details
 if (isset($_GET['mail'])) {
     $creatorEmail = $_GET['mail'];
-    $sql = "SELECT art, art_desc, art_genre, rating FROM user WHERE mail = ?";
+    $sql = "SELECT art, art_desc, art_genre, rating FROM user WHERE mail =?";
     $stmt = $conn->prepare($sql);
     $stmt->bind_param("s", $creatorEmail);
     $stmt->execute();
@@ -12,22 +15,27 @@ if (isset($_GET['mail'])) {
 
     if ($result->num_rows > 0) {
         $row = $result->fetch_assoc();
+        // Extract relevant artwork details
         $artImage = htmlspecialchars($row['art']);
         $artDesc = htmlspecialchars($row['art_desc']);
         $artGenre = htmlspecialchars($row['art_genre']);
-        $currentRating = $row['rating'] ?? 0;
+        $currentRating = $row['rating']?? 0; // Default to 0 if no rating exists
     } else {
+        // Handle no results found
         echo "No details found for this creator.";
         exit();
     }
 } else {
+    // Handle missing creator email
     echo "No creator email provided.";
     exit();
 }
 
+// Process Rating Submission
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['rating'])) {
     $newRating = $_POST['rating'];
-    $newAverageRating = ($currentRating == 0) ? $newRating : ($currentRating + $newRating) / 2;
+    // Calculate new average rating 
+    $newAverageRating = ($currentRating == 0)? $newRating : ($currentRating + $newRating) / 2;
     $finalRating = round($newAverageRating);
 
     $updateSql = "UPDATE user SET rating=? WHERE mail=?";
@@ -35,26 +43,21 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['rating'])) {
     $updateStmt->bind_param("is", $finalRating, $creatorEmail);
    
     if ($updateStmt->execute()) {
+        // Update successful
         $thankYouMessage = "Thank you for your feedback!";
-        $currentRating = $finalRating;
+        $currentRating = $finalRating; // Update current rating 
     } else {
-        echo "Error updating the rating: " . $conn->error;
+        // Handle update failure
+        echo "Error updating the rating: ". $conn->error;
     }
 }
 ?>
 
+<!-- **HTML Structure and Styling** -->
 <!DOCTYPE html>
 <html>
 <head>
     <title>Artwork Details - Gallery Hub</title>
-    <style>
-        /* Base Styles */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', system-ui, sans-serif;
-        }
 
         :root {
             --primary: #6d28d9;
@@ -286,6 +289,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['rating'])) {
     </style>
 </head>
 <body>
+    
     <nav class="nav">
         <div class="nav-container">
             <div class="logo">Gallery Hub</div>
@@ -337,12 +341,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['rating'])) {
             <div class="comment-section">
             <h2 style="text-align: center;">Write a comment</h2>
 
+                    <!-- **Comment Form** -->
             <form method="post" action="" id="commentForm" style="text-align: center; margin-bottom: 20px;">
                 <textarea name="new_comment" required placeholder="Tell us your thoughts!" style="width: 80%; height: 100px; border-radius: 5px; padding: 10px; font-size: 16px; border: 1px solid #ccc; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);"></textarea>
                 <br>
                 <button type="submit" class="btn btn-primary" style="margin-top: 10px; padding: 10px 20px; font-size: 16px; border-radius: 5px;">Submit Comment</button>
             </form>
 
+                    <!-- **Display Existing Comments** -->
             <h2 style="text-align: center;">Comment Section</h2>
             
             <div class="existing-comments" id="commentsContainer" style="border: 1px solid #ccc; padding: 1rem; border-radius: 8px; margin-top: 1rem; background: #f9f9f9;">
@@ -354,10 +360,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['rating'])) {
                 $commentsResult = $commentsStmt->get_result();
 
                 if ($commentsResult->num_rows > 0) {
+                            // **Format and Display Individual Comments**
                     $commentsRow = $commentsResult->fetch_assoc();
                     $comments = $commentsRow['comment'];
                     $individualComments = explode("<?>", $comments);
 
+                            // **Simple Color Rotation for Comment Backgrounds**
                     $colors = ['#e0f7fa', '#ffebee', '#ffe0b2', '#e1bee7', '#c8e6c9'];
 
                     foreach ($individualComments as $index => $individualComment) {
@@ -367,11 +375,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['rating'])) {
                         }
                     }
                 } else {
+                            // **Handle No Comments**
                     echo "<p>No comments yet.</p>";
                 }
                 ?>
             </div>
-
+            //New Comment Submission
             <?php
             if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['new_comment'])) {
                 $newComment = $_POST['new_comment'];

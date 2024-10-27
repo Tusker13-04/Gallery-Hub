@@ -2,20 +2,26 @@
 session_start();
 include 'db.php';
 
+// Handle form submission
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $email = $_POST['email'];
     $password = $_POST['password'];
     $confirm_password = $_POST['confirm_password'];
 
+    // Check if passwords match
     if ($password === $confirm_password) {
+        // Insert new user into the database
         $sql = "INSERT INTO user (mail, pass) VALUES ('$email', '$password')";
         if ($conn->query($sql) === TRUE) {
+            // Redirect to home page with success status
             header("Location: index.php?status=created");
             exit();
         } else {
+            // Display error message if query fails
             echo "Error: " . $sql . "<br>" . $conn->error;
         }
     } else {
+        // Display error message if passwords do not match
         echo "Passwords do not match.";
     }
 }
@@ -26,6 +32,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 <head>
     <title>Sign Up - Gallery Hub</title>
     <style>
+        /* Base Styles */
         * {
             margin: 0;
             padding: 0;
@@ -51,6 +58,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             line-height: 1.6;
         }
 
+        /* Navigation Styles */
         .nav {
             position: fixed;
             top: 0;
@@ -85,6 +93,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             transform: scale(1.05);
         }
 
+        /* Form Container Styles */
         .form-container {
             max-width: 400px;
             margin: 2rem auto;
@@ -127,6 +136,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             box-shadow: 0 0 0 3px rgba(109, 40, 217, 0.1);
         }
 
+        /* Button Styles */
         .btn {
             padding: 0.75rem 1.5rem;
             border-radius: 8px;
