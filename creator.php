@@ -422,8 +422,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 
                 // Send the Base64 encoded image to the Ollama LLaVA model
                 const payload = {
-                    model: "llava:latest",
-                    prompt: "Generate a list of descriptive tags for the given image. Use a bag of words and ensure the tags are relevant and dicriptive, such that even a blind person can visualizw the image from the given each word must be separate by comma, don't use prepositions.",
+                    model: "x/llama3.2-vision:latest",
+                    prompt: "Generate a list of descriptive tags for the given image. Use a bag of words and ensure the tags are relevant and dicriptive, such that even a blind person can visualize the image from the given. each word must be separate by comma, don't use prepositions.",
                     images: [base64Image],
                     format: "json",
                     stream: false,
@@ -435,12 +435,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify(payload),
+                    
                 });
 
                 if (!analysisResponse.ok) {
                     throw new Error('Failed to analyze image');
                 }
-
+                console.log("Raw response:", analysisData);
                 const analysisData = await analysisResponse.json();
                 
                 // Display the response in both the analysis result div and genre input
