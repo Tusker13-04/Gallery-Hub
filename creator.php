@@ -1,7 +1,6 @@
 <?php
 // Start the session to access the current user's data
 session_start();
-// Include the database connection file
 include 'db.php';
 
 // Query to retrieve the current user's ID
